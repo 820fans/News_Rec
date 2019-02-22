@@ -25,6 +25,7 @@ class basemodel():
 
     def predict(self, user, item):
         """预测user对item的评分"""
+        print("base predict")
         prediction = self.mean_item[item]
         return prediction
 
@@ -39,17 +40,23 @@ class basemodel():
         return [rec_topK[i][0] for i in range(K)]
 
     def evaluation(self, test_df, topn = 10):
+        
         read_sum = test_df.shape[0]
         user_row = np.array([test_df.iloc[i, 0] for i in range(read_sum)])
         item_col = np.array([test_df.iloc[i, 1] for i in range(read_sum)])
         read_score = np.array([1 for i in range(read_sum)])
+        # 构建稀疏矩阵
         self.test_mat = csr_matrix((read_score, (user_row, item_col)), shape=(self.USER_NUM, self.ITEM_NUM))
+        # print(self.test_mat)
+
         ui_dict = dict()
         for i in range(test_df.shape[0]):
             if test_df.iloc[i, 0] not in ui_dict.keys():
                 ui_dict[test_df.iloc[i, 0]] = [test_df.iloc[i, 1]]
             else:
                 ui_dict[test_df.iloc[i, 0]].append(test_df.iloc[i, 1])
+        # ui_dict() 测试集合里，用户点击的新闻，一个用户对应多个新闻
+        
         # 计算MAP和NDCG
         mAP = 0
         nDCG = 0
@@ -58,12 +65,12 @@ class basemodel():
         user_sum = len(ui_dict)
         for user, itemlist in ui_dict.items():
             eval_user += 1
-            if eval_user % 1 == 0:
+            if eval_user % 100 == 0:
                 print("Eval process: %d / %d" % (eval_user, user_sum))
             if eval_user > user_sum:
                 break
             predlist = self.predict_topK(user, topn)
-            reclist = list(set(itemlist))
+            reclist = list(set(itemlist)) # 用户实际点击了哪些新闻
             mPrecision += self.cal_PN(predlist, reclist)
             mAP += self.cal_AP(predlist, reclist)
             nDCG += self.cal_DCG(user, predlist, reclist)
