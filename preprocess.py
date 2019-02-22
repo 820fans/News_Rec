@@ -38,19 +38,18 @@ def extract():
     uid = 0
     nid = 0
     # 提取用户和新闻id,存储新闻内容
-    news_info_file = open("Data/news_context.txt", 'w', encoding='utf-8')
-    for i in range(data_df.shape[0]):
-        user_id = data_df.iloc[i, 0]
-        news_id = data_df.iloc[i, 1]
-        if user_id not in user_dict:
-            user_dict[user_id] = uid
-            uid += 1
-        if news_id not in news_dict:
-            news_dict[news_id] = nid
-            context = [str(nid), str(data_df.iloc[i, 3]), str(data_df.iloc[i, 4]), str(data_df.iloc[i, 5])]
-            news_info_file.write('\t'.join(context) + '\n')
-            nid += 1
-    news_info_file.close()
+    with open("Data/news_context.txt") as news_info_file:
+        for i in range(data_df.shape[0]):
+            user_id = data_df.iloc[i, 0]
+            news_id = data_df.iloc[i, 1]
+            if user_id not in user_dict:
+                user_dict[user_id] = uid
+                uid += 1
+            if news_id not in news_dict:
+                news_dict[news_id] = nid
+                context = [str(nid), str(data_df.iloc[i, 3]), str(data_df.iloc[i, 4]), str(data_df.iloc[i, 5])]
+                news_info_file.write('\t'.join(context) + '\n')
+                nid += 1
 
     # 存储用户id字典和新闻id字典
     user_list = sorted(user_dict.items(), key=lambda e: e[1], reverse=False)
@@ -72,7 +71,7 @@ def extract():
     user_news_df.to_csv("Data/user_news_id.csv", sep='\t', header=False, index=False)
 
 # 时间戳转日期
-def timestamp_datatime(value):
+def timestamp2datatime(value):
     format = '%Y-%m-%d %H:%M'
     #format = '%Y-%m-%d %H:%M:%S'
     #value 为时间戳值,如:1460073600.0
@@ -86,7 +85,7 @@ def split_data():
     test_file = open("Data/test_data.txt", 'w', encoding='utf-8')
     for i in range(data_df.shape[0]):
         read_time = data_df.iloc[i, 2]
-        date = timestamp_datatime(read_time)
+        date = timestamp2datatime(read_time)
         day = date.split(' ')[0].split('-')[2]
         uid = str(data_df.iloc[i, 0])
         nid = str(data_df.iloc[i, 1])
@@ -97,4 +96,25 @@ def split_data():
     train_file.close()
     test_file.close()
 
-split_data()
+def cold_start():
+    # 统计冷启动用户有多少
+    train_df = pd.read_csv("Data/train_data.txt", header=-1, sep='\t')
+    test_df = pd.read_csv("Data/test_data.txt", header=-1, sep='\t')
+    train_uset = set()
+    for i in range(train_df.shape[0]):
+        train_uset.add(train_df.iloc[i, 0])
+    print("Train users:", str(len(train_uset)))
+    test_uset = set()
+    for i in range(test_df.shape[0]):
+        test_uset.add(test_df.iloc[i, 0])
+    print("Test users:", str(len(test_uset)))
+    # 寻找出现在test_set里，却没有出现在train_uset里的用户
+    cnt = 0
+    for test_uid in test_uset:
+        if test_uid not in train_uset:
+            cnt += 1
+    print(str(cnt) + " users not in train_uset")
+    print(str(100*cnt/(len(test_uset))) + "% percent in test_data is cold")
+# split_data()
+# statistic()
+cold_start()
