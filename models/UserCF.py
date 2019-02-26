@@ -66,4 +66,7 @@ if __name__ == "__main__":
     # 原始得分：     mPrecision: 0.00143266  mAP: 0.00356707  nDCG: 0.00321783
     # 修改过后的得分：mPrecision: 0.00148997  mAP: 0.00362675  nDCG: 0.00358119  # sim>0.01
     # 再次修改得分:  mPrecision: 0.00148997  mAP: 0.00362675  nDCG: 0.00358119 # 没有发生变化，说明点击信息太稀疏了...
+
+    # 對比
+    # embedding profile：mPrecision: 0.00258949  mAP: 0.00486149  nDCG: 0.00438426
     pass

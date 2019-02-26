@@ -11,7 +11,7 @@ import numpy as np
 
 data_df = pd.read_csv("Data/train_data.txt", sep='\t', header=-1)
 test_df = pd.read_csv("Data/test_data.txt", sep='\t', header=-1)
-# model = NMF_model(data_df, 5)
+# model = NMF_model(data_df, 50)
 # model = NMF_model(data_df, 20)
 # model = userCF(data_df, 5)
 model = SVD_model(data_df, 6)
